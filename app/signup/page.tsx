@@ -2,8 +2,19 @@
 import { Suspense, useState, useTransition } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
-import { Btn, SectionLabel, FormInput, FormSelect, Card, SkillTagsInput, QRScanner } from "@/components/ui";
+import dynamic from "next/dynamic";
+import { Btn, SectionLabel, FormInput, FormSelect, Card, SkillTagsInput } from "@/components/ui";
 import { memberSignup } from "@/lib/supabase/actions";
+
+const QRScanner = dynamic(() => import("@/components/QRScanner"), {
+  ssr: false,
+  loading: () => (
+    <div className="flex flex-col items-center justify-center h-48 gap-2 text-[0.82rem] text-muted">
+      <span className="text-2xl">⊙</span>
+      Loading scanner…
+    </div>
+  ),
+});
 
 function extractBranchCode(scanned: string): string | null {
   try {
