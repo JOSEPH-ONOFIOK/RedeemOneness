@@ -2,21 +2,25 @@
 import { Suspense, useState, useTransition } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
-import { Btn, SectionLabel, FormInput, FormSelect, Card, SkillTagsInput } from "@/components/ui";
+import { Btn, SectionLabel, FormInput, FormSelect, Card, SkillTagsInput, PasswordInput } from "@/components/ui";
 import { memberSignup } from "@/lib/supabase/actions";
 
 function SignupContent() {
   const searchParams = useSearchParams();
   const branchCode = searchParams.get("branch") ?? "";
 
+  const [password, setPassword]   = useState("");
   const [formError, setFormError] = useState("");
   const [skills, setSkills]       = useState<string[]>([]);
   const [isPending, startTransition] = useTransition();
 
   function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    setFormError("");
     const fd = new FormData(e.currentTarget);
+    if (fd.get("password") !== fd.get("confirm_password")) {
+      setFormError("Passwords do not match."); return;
+    }
+    setFormError("");
     fd.set("branch_code", branchCode);
     fd.set("skills", skills.join(","));
     startTransition(async () => {
@@ -25,7 +29,6 @@ function SignupContent() {
     });
   }
 
-  // No branch code — member must scan the admin's QR code first
   if (!branchCode) {
     return (
       <div className="min-h-screen bg-warm-white flex items-center justify-center px-6">
@@ -52,7 +55,6 @@ function SignupContent() {
   return (
     <div className="min-h-screen bg-warm-white flex items-center justify-center px-6 py-24">
       <div className="w-full max-w-[520px] animate-fade-up">
-
         <div className="text-center mb-10">
           <Link href="/" className="font-serif text-[1.3rem] font-semibold text-deep-brown block mb-4">
             Redeem <em className="text-amber">Oneness</em>
@@ -72,16 +74,13 @@ function SignupContent() {
             <FormInput label="Full Name" name="full_name"  placeholder="Chidera Okafor"           required />
             <FormInput label="Email"     name="email"      type="email" placeholder="chidera@email.com" required />
             <FormInput label="Phone"     name="phone"      type="tel"   placeholder="+234 801 234 5678" />
-            <FormInput label="Password"  name="password"   type="password" placeholder="Create a strong password" required />
+            <PasswordInput label="Password"         name="password"         placeholder="Create a strong password" required onChange={(e) => setPassword(e.target.value)} />
+            <PasswordInput label="Confirm Password" name="confirm_password" placeholder="Repeat your password"     required confirmOf={password} />
             <FormInput label="Location"  name="location"   placeholder="Lagos, Nigeria" />
-            <FormSelect
-              label="Sector Interests" name="sector_interests"
-              options={["Select sectors…","Technology","Finance","Healthcare","Education","Creative Arts","Engineering","Law","Business"]}
-            />
-            <FormSelect
-              label="Job Categories" name="job_categories"
-              options={["Select categories…","Internship","Full-time","Part-time","Volunteer","Freelance"]}
-            />
+            <FormSelect label="Sector Interests" name="sector_interests"
+              options={["Select sectors…","Technology","Finance","Healthcare","Education","Creative Arts","Engineering","Law","Business"]} />
+            <FormSelect label="Job Categories" name="job_categories"
+              options={["Select categories…","Internship","Full-time","Part-time","Volunteer","Freelance"]} />
             <SkillTagsInput label="Skills" initial={[]} onChange={setSkills} />
             {formError && (
               <p className="text-terra text-[0.78rem] mb-4 p-3 bg-terra/5 rounded-sm border border-terra/20">{formError}</p>
@@ -105,9 +104,5 @@ function SignupContent() {
 }
 
 export default function SignupPage() {
-  return (
-    <Suspense>
-      <SignupContent />
-    </Suspense>
-  );
+  return <Suspense><SignupContent /></Suspense>;
 }

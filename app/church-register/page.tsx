@@ -1,17 +1,21 @@
 "use client";
 import Link from "next/link";
 import { useState, useTransition } from "react";
-import { Btn, SectionLabel, FormInput, Card } from "@/components/ui";
+import { Btn, SectionLabel, FormInput, Card, PasswordInput } from "@/components/ui";
 import { churchSignup } from "@/lib/supabase/actions";
 
 export default function ChurchRegisterPage() {
-  const [error, setError] = useState("");
+  const [password, setPassword]   = useState("");
+  const [error, setError]         = useState("");
   const [isPending, startTransition] = useTransition();
 
   function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    setError("");
     const fd = new FormData(e.currentTarget);
+    if (fd.get("password") !== fd.get("confirm_password")) {
+      setError("Passwords do not match."); return;
+    }
+    setError("");
     startTransition(async () => {
       const result = await churchSignup(fd);
       if (result?.error) setError(result.error);
@@ -38,9 +42,10 @@ export default function ChurchRegisterPage() {
 
             <div className="border-t border-[rgba(60,42,20,0.1)] pt-5 mt-1 mb-1">
               <p className="text-[0.68rem] tracking-[0.1em] uppercase text-muted mb-4">Admin Account</p>
-              <FormInput label="Admin Name"  name="admin_name" placeholder="Pastor Emmanuel Adeyemi" required />
-              <FormInput label="Admin Email" name="email"      type="email"    required />
-              <FormInput label="Password"    name="password"   type="password" placeholder="Create a strong password" required />
+              <FormInput    label="Admin Name"       name="admin_name" placeholder="Pastor Emmanuel Adeyemi" required />
+              <FormInput    label="Admin Email"      name="email"      type="email"    required />
+              <PasswordInput label="Password"         name="password"         placeholder="Create a strong password" required onChange={(e) => setPassword(e.target.value)} />
+              <PasswordInput label="Confirm Password" name="confirm_password" placeholder="Repeat your password"     required confirmOf={password} />
             </div>
 
             {error && (

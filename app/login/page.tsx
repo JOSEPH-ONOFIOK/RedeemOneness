@@ -2,38 +2,48 @@
 import Link from "next/link";
 import { useState, useTransition } from "react";
 import clsx from "clsx";
-import { Btn, SectionLabel, FormInput, Card } from "@/components/ui";
-import { login } from "@/lib/supabase/actions";
+import { Btn, SectionLabel, FormInput, Card, PasswordInput } from "@/components/ui";
+import { login, forgotPassword } from "@/lib/supabase/actions";
 
 type Role = "member" | "business" | "mentor" | "admin";
 
-const ROLES: {
-  id: Role;
-  label: string;
-  registerHref: string;
-  registerLabel: string;
-  note?: string;
-}[] = [
-  { id: "member",   label: "Member",      registerHref: "/signup",           registerLabel: "Join as Member",       note: "Scan your church branch QR code to create an account" },
-  { id: "business", label: "Business",    registerHref: "/business-register", registerLabel: "Register a Business" },
-  { id: "mentor",   label: "Mentor",      registerHref: "/mentor-register",   registerLabel: "Become a Mentor" },
-  { id: "admin",    label: "Branch Admin",registerHref: "/church-register",   registerLabel: "Register a Branch" },
+const ROLES: { id: Role; label: string; registerHref: string; registerLabel: string }[] = [
+  { id: "member",   label: "Member",       registerHref: "/signup",            registerLabel: "Join as Member" },
+  { id: "business", label: "Business",     registerHref: "/business-register", registerLabel: "Register a Business" },
+  { id: "mentor",   label: "Mentor",       registerHref: "/mentor-register",   registerLabel: "Become a Mentor" },
+  { id: "admin",    label: "Branch Admin", registerHref: "/church-register",   registerLabel: "Register a Branch" },
 ];
 
 export default function LoginPage() {
-  const [role, setRole]   = useState<Role>("member");
-  const [error, setError] = useState("");
+  const [role, setRole]           = useState<Role>("member");
+  const [error, setError]         = useState("");
+  const [showForgot, setShowForgot] = useState(false);
+  const [forgotEmail, setForgotEmail] = useState("");
+  const [forgotMsg, setForgotMsg] = useState("");
   const [isPending, startTransition] = useTransition();
 
   const current = ROLES.find((r) => r.id === role)!;
 
-  function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+  function handleLogin(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setError("");
-    const formData = new FormData(e.currentTarget);
+    const fd = new FormData(e.currentTarget);
     startTransition(async () => {
-      const result = await login(formData);
+      const result = await login(fd);
       if (result?.error) setError(result.error);
+    });
+  }
+
+  function handleForgot(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    setForgotMsg("");
+    const fd = new FormData();
+    fd.set("email", forgotEmail);
+    fd.set("origin", window.location.origin);
+    startTransition(async () => {
+      const result = await forgotPassword(fd);
+      if (result?.error) setForgotMsg(result.error);
+      else setForgotMsg("Check your email for a reset link.");
     });
   }
 
@@ -77,7 +87,6 @@ export default function LoginPage() {
           <SectionLabel>Welcome Back</SectionLabel>
           <h1 className="font-serif text-[2.6rem] font-light mb-6">Sign in</h1>
 
-          {/* Role tabs */}
           <div className="flex border border-[rgba(60,42,20,0.12)] rounded-sm mb-6 overflow-hidden">
             {ROLES.map((r) => (
               <button key={r.id} type="button" onClick={() => { setRole(r.id); setError(""); }}
@@ -90,32 +99,50 @@ export default function LoginPage() {
             ))}
           </div>
 
-          <Card>
-            <form onSubmit={handleSubmit}>
-              <FormInput label="Email"    name="email"    type="email"    placeholder="you@example.com" required />
-              <FormInput label="Password" name="password" type="password" placeholder="••••••••"        required />
-              {error && (
-                <p className="text-terra text-[0.78rem] mb-4 p-3 bg-terra/5 rounded-sm border border-terra/20">{error}</p>
-              )}
-              <div className="text-right mb-5">
-                <span className="text-[0.78rem] text-amber cursor-pointer hover:underline">Forgot password?</span>
-              </div>
-              <Btn type="submit" className="w-full justify-center" disabled={isPending}>
-                {isPending ? "Signing in…" : `Sign in as ${current.label}`}
-              </Btn>
-            </form>
-            <p className="text-[0.75rem] text-muted text-center mt-4">
-              No account?{" "}
-              <Link href={current.registerHref} className="text-amber hover:underline">
-                {current.registerLabel}
-              </Link>
-            </p>
-          </Card>
-
-          {current.id === "member" && (
-            <p className="text-[0.72rem] text-muted/60 text-center mt-3 flex items-center justify-center gap-1.5">
-              <span className="text-amber">⊙</span> New members: scan your branch QR code to register
-            </p>
+          {!showForgot ? (
+            <Card>
+              <form onSubmit={handleLogin}>
+                <FormInput label="Email" name="email" type="email" placeholder="you@example.com" required />
+                <PasswordInput label="Password" name="password" placeholder="••••••••" required />
+                {error && (
+                  <p className="text-terra text-[0.78rem] mb-4 p-3 bg-terra/5 rounded-sm border border-terra/20">{error}</p>
+                )}
+                <div className="text-right mb-5 -mt-2">
+                  <button type="button" onClick={() => setShowForgot(true)}
+                    className="text-[0.78rem] text-amber hover:underline">
+                    Forgot password?
+                  </button>
+                </div>
+                <Btn type="submit" className="w-full justify-center" disabled={isPending}>
+                  {isPending ? "Signing in…" : `Sign in as ${current.label}`}
+                </Btn>
+              </form>
+              <p className="text-[0.75rem] text-muted text-center mt-4">
+                No account?{" "}
+                <Link href={current.registerHref} className="text-amber hover:underline">{current.registerLabel}</Link>
+              </p>
+            </Card>
+          ) : (
+            <Card>
+              <h2 className="font-serif text-[1.4rem] font-light mb-1">Reset password</h2>
+              <p className="text-[0.8rem] text-muted mb-5">Enter your email and we'll send a reset link.</p>
+              <form onSubmit={handleForgot}>
+                <FormInput label="Email" type="email" placeholder="you@example.com"
+                  value={forgotEmail} onChange={(e) => setForgotEmail(e.target.value)} required />
+                {forgotMsg && (
+                  <p className={clsx("text-[0.78rem] mb-4 p-3 rounded-sm border",
+                    forgotMsg.includes("Check") ? "text-forest bg-forest/5 border-forest/20" : "text-terra bg-terra/5 border-terra/20"
+                  )}>{forgotMsg}</p>
+                )}
+                <Btn type="submit" className="w-full justify-center mb-3" disabled={isPending}>
+                  {isPending ? "Sending…" : "Send reset link"}
+                </Btn>
+              </form>
+              <button onClick={() => setShowForgot(false)}
+                className="text-[0.78rem] text-muted hover:text-deep-brown transition-colors">
+                ← Back to login
+              </button>
+            </Card>
           )}
 
           <p className="text-[0.72rem] text-muted/50 text-center mt-4">

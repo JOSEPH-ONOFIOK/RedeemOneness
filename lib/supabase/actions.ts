@@ -35,6 +35,29 @@ export async function logout() {
   redirect("/login");
 }
 
+// ── FORGOT PASSWORD ───────────────────────────────────────────
+export async function forgotPassword(formData: FormData) {
+  const supabase = await createClient();
+  const email = formData.get("email") as string;
+  const origin = formData.get("origin") as string;
+
+  const { error } = await supabase.auth.resetPasswordForEmail(email, {
+    redirectTo: `${origin}/auth/reset-password`,
+  });
+  if (error) return { error: error.message };
+  return { success: true };
+}
+
+// ── RESET PASSWORD ────────────────────────────────────────────
+export async function resetPassword(formData: FormData) {
+  const supabase = await createClient();
+  const password = formData.get("password") as string;
+
+  const { error } = await supabase.auth.updateUser({ password });
+  if (error) return { error: error.message };
+  redirect("/login");
+}
+
 // ── MEMBER SIGNUP ────────────────────────────────────────────
 export async function memberSignup(formData: FormData) {
   const supabase = await createClient();

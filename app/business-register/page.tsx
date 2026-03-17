@@ -1,17 +1,21 @@
 "use client";
 import Link from "next/link";
 import { useState, useTransition } from "react";
-import { Btn, SectionLabel, FormInput, FormSelect, FormTextarea, Card } from "@/components/ui";
+import { Btn, SectionLabel, FormInput, FormSelect, FormTextarea, Card, PasswordInput } from "@/components/ui";
 import { businessSignup } from "@/lib/supabase/actions";
 
 export default function BusinessRegisterPage() {
-  const [error, setError] = useState("");
+  const [password, setPassword]   = useState("");
+  const [error, setError]         = useState("");
   const [isPending, startTransition] = useTransition();
 
   function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    setError("");
     const fd = new FormData(e.currentTarget);
+    if (fd.get("password") !== fd.get("confirm_password")) {
+      setError("Passwords do not match."); return;
+    }
+    setError("");
     startTransition(async () => {
       const result = await businessSignup(fd);
       if (result?.error) setError(result.error);
@@ -28,9 +32,10 @@ export default function BusinessRegisterPage() {
         <h1 className="font-serif text-[2.6rem] font-light mb-8">Register your <em className="text-sky">Business</em></h1>
         <Card>
           <form onSubmit={handleSubmit}>
-            <FormInput label="Company Name"   name="company_name" placeholder="XYZ Tech Ltd"         required />
-            <FormInput label="Contact Email"  name="email"        type="email"                        required />
-            <FormInput label="Password"       name="password"     type="password" placeholder="Create a strong password" required />
+            <FormInput label="Company Name"     name="company_name" placeholder="XYZ Tech Ltd"    required />
+            <FormInput label="Contact Email"    name="email"        type="email"                   required />
+            <PasswordInput label="Password"         name="password"         placeholder="Create a strong password" required onChange={(e) => setPassword(e.target.value)} />
+            <PasswordInput label="Confirm Password" name="confirm_password" placeholder="Repeat your password"     required confirmOf={password} />
             <FormSelect label="Industry Sector" name="industry"
               options={["Select sector…","Technology","Finance","Healthcare","Education","Manufacturing","Creative"]} required />
             <FormTextarea label="Company Description" name="description"
@@ -49,9 +54,6 @@ export default function BusinessRegisterPage() {
           <Link href="/login" className="text-[0.75rem] text-muted/60 hover:text-muted transition-colors">
             Already registered? Sign in →
           </Link>
-        </p>
-        <p className="text-center mt-2">
-          <Link href="/" className="text-[0.75rem] text-muted/60 hover:text-muted transition-colors">← Back to home</Link>
         </p>
       </div>
     </div>

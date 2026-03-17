@@ -36,6 +36,7 @@ export function Btn({
   className = "",
   small = false,
   type = "button",
+  form,
   disabled = false,
 }: {
   children: ReactNode;
@@ -45,6 +46,7 @@ export function Btn({
   className?: string;
   small?: boolean;
   type?: "button" | "submit";
+  form?: string;
   disabled?: boolean;
 }) {
   const base =
@@ -64,7 +66,7 @@ export function Btn({
 
   if (href) return <Link href={href} className={cls}>{children}</Link>;
   return (
-    <button type={type} onClick={onClick} disabled={disabled} className={cls}>
+    <button type={type} form={form} onClick={onClick} disabled={disabled} className={cls}>
       {children}
     </button>
   );
@@ -141,6 +143,73 @@ export function SectionLabel({ children, center = false }: { children: ReactNode
       <span className="block w-6 h-px bg-amber" />
       {children}
       {center && <span className="block w-6 h-px bg-amber" />}
+    </div>
+  );
+}
+
+// ── PasswordInput (show/hide + optional confirm) ──────────────────
+export function PasswordInput({
+  label,
+  name,
+  placeholder,
+  required,
+  confirmOf,
+  onChange,
+}: {
+  label?: string;
+  name: string;
+  placeholder?: string;
+  required?: boolean;
+  confirmOf?: string;
+  onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
+}) {
+  const [show, setShow] = useState(false);
+  const [val, setVal]   = useState("");
+  const match = confirmOf !== undefined && val.length > 0 ? val === confirmOf : null;
+
+  return (
+    <div className="mb-5">
+      {label && (
+        <label className="block text-[0.72rem] tracking-[0.1em] uppercase text-muted mb-1.5">
+          {label}{required && <span className="text-amber"> *</span>}
+        </label>
+      )}
+      <div className="relative">
+        <input
+          type={show ? "text" : "password"}
+          name={name}
+          value={val}
+          onChange={(e) => { setVal(e.target.value); onChange?.(e); }}
+          placeholder={placeholder}
+          required={required}
+          className={clsx(
+            "w-full px-3.5 py-2.5 pr-10 border rounded-sm bg-warm-white text-deep-brown text-[0.88rem] outline-none transition-colors duration-200",
+            match === true  && "border-forest focus:border-forest",
+            match === false && "border-terra focus:border-terra",
+            match === null  && "border-[rgba(60,42,20,0.12)] focus:border-amber"
+          )}
+        />
+        <button type="button" tabIndex={-1} onClick={() => setShow(!show)}
+          className="absolute right-3 top-1/2 -translate-y-1/2 text-muted hover:text-deep-brown transition-colors">
+          {show ? (
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/>
+              <line x1="1" y1="1" x2="23" y2="23"/>
+            </svg>
+          ) : (
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+              <circle cx="12" cy="12" r="3"/>
+            </svg>
+          )}
+        </button>
+      </div>
+      {match === false && (
+        <p className="text-terra text-[0.68rem] mt-1">Passwords do not match</p>
+      )}
+      {match === true && (
+        <p className="text-forest text-[0.68rem] mt-1">Passwords match ✓</p>
+      )}
     </div>
   );
 }
