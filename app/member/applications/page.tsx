@@ -15,7 +15,7 @@ export default function ApplicationsPage() {
       <div className="space-y-3 max-w-[700px]">
         {APPS.map((a)=>(
           <Card key={a.role} hover>
-            <div className="flex justify-between items-center">
+            <div className="flex flex-col sm:flex-row justify-between gap-2 sm:gap-3">
               <div>
                 <div className="flex items-center gap-2 mb-1">
                   <span className="font-serif text-[1.05rem] font-semibold">{a.role}</span>

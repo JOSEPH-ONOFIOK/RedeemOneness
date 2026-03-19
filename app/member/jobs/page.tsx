@@ -85,7 +85,7 @@ export default function JobsPage() {
   return (
     <>
       <PageTitle label="Opportunities" title="Job Feed" />
-      <div className="grid md:grid-cols-[220px_1fr] gap-8">
+      <div className="grid grid-cols-1 md:grid-cols-[220px_1fr] gap-4 md:gap-8">
 
         {/* Sidebar filters */}
         <div>

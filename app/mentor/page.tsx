@@ -116,13 +116,13 @@ export default function MentorHomePage() {
   return (
     <>
       <PageTitle label="Mentor Dashboard" title={`Welcome, ${firstName}`} />
-      <div className="grid grid-cols-3 gap-4 mb-8">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 sm:gap-4 mb-4 sm:mb-8">
         <StatCard number={String(activeCount)}      label="Active Mentees"    icon="◈" colorClass="text-amber" />
         <StatCard number={String(pendingCount)}     label="Pending Requests"  icon="⌛" colorClass="text-terra" />
         <StatCard number={String(announcementCount)} label="Announcements"   icon="📢" colorClass="text-sage"  />
       </div>
 
-      <div className="grid lg:grid-cols-[1fr_300px] gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-[1fr_300px] gap-4 lg:gap-6">
         <div>
           <h2 className="font-serif text-[1.3rem] font-semibold mb-4">Recent Requests</h2>
           {recentRequests.length === 0 ? (

@@ -136,7 +136,7 @@ export default function JobDetailPage() {
         ← Back to Jobs
       </Link>
 
-      <div className="flex justify-between items-start mb-8">
+      <div className="flex flex-col sm:flex-row justify-between items-start gap-3 mb-4 sm:mb-8">
         <div>
           <SectionLabel>Job Opportunity</SectionLabel>
           <h1 className="font-serif text-[2.4rem] font-light leading-tight">{job.title}</h1>

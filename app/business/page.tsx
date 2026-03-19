@@ -98,7 +98,7 @@ export default function BusinessHomePage() {
         return;
       }
 
-      const memberIds = [...new Set(recent5.map((a) => a.member_id))];
+      const memberIds = Array.from(new Set(recent5.map((a) => a.member_id)));
 
       const { data: profiles } = await supabase
         .from("profiles")
@@ -140,7 +140,7 @@ export default function BusinessHomePage() {
     return (
       <>
         <PageTitle label="Overview" title="Business Dashboard" action={<Btn href="/business/post-job">+ Post New Job</Btn>} />
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 md:gap-4 mb-4 md:mb-8">
           {["Active Jobs", "Applications", "Accepted", "Total Jobs"].map((label) => (
             <Card key={label} className="text-center animate-pulse">
               <div className="h-10 bg-[rgba(60,42,20,0.06)] rounded mb-2" />
@@ -160,14 +160,14 @@ export default function BusinessHomePage() {
         action={<Btn href="/business/post-job">+ Post New Job</Btn>}
       />
 
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 md:gap-4 mb-4 md:mb-8">
         <StatCard number={String(activeJobs.length)} label="Active Jobs"     icon="⚡" colorClass="text-amber"  />
         <StatCard number={String(totalApps)}          label="Applications"   icon="◈"  colorClass="text-sage"   />
         <StatCard number={String(acceptedApps)}       label="Accepted"       icon="✓"  colorClass="text-forest" />
         <StatCard number={String(totalJobs)}          label="Total Jobs"     icon="✦"  colorClass="text-terra"  />
       </div>
 
-      <div className="grid lg:grid-cols-[1fr_320px] gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-4 lg:gap-6">
         {/* Active job postings */}
         <div>
           <h2 className="font-serif text-[1.3rem] font-semibold mb-4">Active Job Postings</h2>

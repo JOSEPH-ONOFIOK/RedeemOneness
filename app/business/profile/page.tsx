@@ -146,7 +146,7 @@ export default function CompanyProfilePage() {
     return (
       <>
         <PageTitle label="Company" title="Company Profile" />
-        <div className="grid md:grid-cols-[1fr_300px] gap-6 max-w-[900px]">
+        <div className="grid grid-cols-1 md:grid-cols-[1fr_300px] gap-4 md:gap-6 max-w-[900px]">
           <Card className="animate-pulse space-y-4">
             <div className="h-16 bg-[rgba(60,42,20,0.06)] rounded" />
             {[1, 2, 3, 4].map((i) => (
@@ -187,10 +187,10 @@ export default function CompanyProfilePage() {
         </div>
       )}
 
-      <div className="grid md:grid-cols-[1fr_300px] gap-6 max-w-[900px]">
+      <div className="grid grid-cols-1 md:grid-cols-[1fr_300px] gap-4 md:gap-6 max-w-[900px]">
         <Card>
           {/* Company header */}
-          <div className="flex gap-4 items-center mb-6">
+          <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 items-start sm:items-center mb-6">
             <div className="w-16 h-16 bg-deep-brown rounded-[4px] flex items-center justify-center font-serif text-[1.6rem] text-gold shrink-0">
               {initials}
             </div>

@@ -71,7 +71,7 @@ export default function BizApplicationsPage() {
         return;
       }
 
-      const memberIds = [...new Set(rawApps.map((a) => a.member_id))];
+      const memberIds = Array.from(new Set(rawApps.map((a) => a.member_id)));
 
       // Fetch profiles
       const { data: profiles } = await supabase
@@ -158,7 +158,7 @@ export default function BizApplicationsPage() {
       <PageTitle label="Recruitment" title="Applications" />
 
       {/* Job filter tabs */}
-      <div className="flex gap-2 mb-5 flex-wrap">
+      <div className="flex gap-1.5 mb-4 flex-wrap overflow-x-auto">
         <button
           onClick={() => setActiveFilter("all")}
           className={`px-4 py-1.5 rounded-sm text-[0.75rem] border transition-colors ${
@@ -194,7 +194,7 @@ export default function BizApplicationsPage() {
         <div className="space-y-3">
           {filteredApps.map((a, i) => (
             <Card key={a.id} hover>
-              <div className="flex justify-between items-start gap-4 flex-wrap">
+              <div className="flex flex-col sm:flex-row justify-between items-start gap-2 sm:gap-4">
                 <div className="flex gap-4 items-start flex-1 min-w-0">
                   <Avatar
                     name={a.memberName}

@@ -150,9 +150,9 @@ export default function MentorProfilePage() {
       {saveSuccess && (
         <p className="text-[0.8rem] text-sage mb-4">Profile updated successfully.</p>
       )}
-      <div className="grid md:grid-cols-[1fr_260px] gap-6 max-w-[860px]">
+      <div className="grid grid-cols-1 md:grid-cols-[1fr_260px] gap-4 md:gap-6 max-w-[860px]">
         <Card>
-          <div className="flex gap-4 items-center mb-6">
+          <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 items-start sm:items-center mb-6">
             <Avatar name={form.full_name || "M"} size={64} colorClass="bg-terra" />
             <div>
               <p className="font-serif text-[1.4rem] font-semibold">{form.full_name || "—"}</p>

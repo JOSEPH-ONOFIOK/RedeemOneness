@@ -67,7 +67,7 @@ export default function SearchMembersPage() {
     }
 
     const memberIds  = rawList.map((m) => m.id);
-    const branchIds  = [...new Set(rawList.map((m) => m.branch_id).filter(Boolean))];
+    const branchIds  = Array.from(new Set(rawList.map((m) => m.branch_id).filter(Boolean)));
 
     // Parallel fetches for profiles and branches
     const [profilesRes, branchesRes] = await Promise.all([
@@ -126,7 +126,7 @@ export default function SearchMembersPage() {
     <>
       <PageTitle label="Recruit" title="Search Members" />
 
-      <div className="grid md:grid-cols-[240px_1fr] gap-8">
+      <div className="grid grid-cols-1 md:grid-cols-[240px_1fr] gap-4 md:gap-8">
         {/* Filters sidebar */}
         <div>
           <Card>
@@ -176,7 +176,7 @@ export default function SearchMembersPage() {
           )}
 
           {loading ? (
-            <div className="grid sm:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               {[1, 2, 3, 4].map((i) => (
                 <Card key={i} className="animate-pulse">
                   <div className="flex gap-3 mb-3">
@@ -201,7 +201,7 @@ export default function SearchMembersPage() {
               </p>
             </Card>
           ) : (
-            <div className="grid sm:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               {members.map((m, i) => {
                 const branch = branchLabel(m);
                 return (

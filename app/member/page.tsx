@@ -146,7 +146,7 @@ export default function MemberHomePage() {
   return (
     <>
       <PageTitle label="Good Morning" title={`${firstName}'s Feed`} />
-      <div className="grid lg:grid-cols-[1fr_300px] gap-8">
+      <div className="grid grid-cols-1 lg:grid-cols-[1fr_300px] gap-4 lg:gap-8">
 
         {/* Feed */}
         <div>
