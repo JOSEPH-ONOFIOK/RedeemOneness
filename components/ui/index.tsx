@@ -280,8 +280,8 @@ export function FormSelect({ label, options, required, className, ...props }: Se
         {...props}
         className={clsx("w-full px-3.5 py-2.5 border border-[rgba(60,42,20,0.12)] rounded-sm bg-warm-white text-deep-brown text-[0.88rem] outline-none focus:border-amber transition-colors duration-200", className)}
       >
-        {options.map((o) => (
-          <option key={o}>{o}</option>
+        {options.map((o, i) => (
+          <option key={o} value={i === 0 && required ? "" : o}>{o}</option>
         ))}
       </select>
     </div>

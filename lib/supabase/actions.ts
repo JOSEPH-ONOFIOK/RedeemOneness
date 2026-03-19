@@ -60,100 +60,127 @@ export async function resetPassword(formData: FormData) {
 
 // ── MEMBER SIGNUP ────────────────────────────────────────────
 export async function memberSignup(formData: FormData) {
-  const supabase = await createClient();
-  const db = createServiceClient();
+  try {
+    const supabase = await createClient();
+    const db = createServiceClient();
 
-  const email      = formData.get("email")            as string;
-  const password   = formData.get("password")         as string;
-  const fullName   = formData.get("full_name")        as string;
-  const phone      = formData.get("phone")            as string;
-  const location   = formData.get("location")         as string;
-  const branchCode = formData.get("branch_code")      as string;
-  const skills     = (formData.get("skills") as string || "").split(",").map(s => s.trim()).filter(Boolean);
-  const sectors    = (formData.get("sector_interests") as string || "").split(",").map(s => s.trim()).filter(Boolean);
-  const jobCats    = (formData.get("job_categories") as string || "").split(",").map(s => s.trim()).filter(Boolean);
+    const email      = formData.get("email")            as string;
+    const password   = formData.get("password")         as string;
+    const fullName   = formData.get("full_name")        as string;
+    const phone      = formData.get("phone")            as string;
+    const location   = formData.get("location")         as string;
+    const branchCode = formData.get("branch_code")      as string;
+    const skills     = (formData.get("skills") as string || "").split(",").map(s => s.trim()).filter(Boolean);
+    const sectors    = (formData.get("sector_interests") as string || "").split(",").map(s => s.trim()).filter(Boolean);
+    const jobCats    = (formData.get("job_categories") as string || "").split(",").map(s => s.trim()).filter(Boolean);
 
-  const { data: { user }, error: signUpError } = await supabase.auth.signUp({ email, password });
-  if (signUpError || !user) return { error: signUpError?.message ?? "Signup failed" };
+    const { data: { user }, error: signUpError } = await supabase.auth.signUp({ email, password });
+    if (signUpError || !user) return { error: signUpError?.message ?? "Signup failed" };
 
-  const { error: profileError } = await db.from("profiles").insert({
-    id: user.id, role: "member" as const, full_name: fullName, email, phone, location,
-  });
-  if (profileError) return { error: profileError.message };
+    const { error: profileError } = await db.from("profiles").insert({
+      id: user.id, role: "member" as const, full_name: fullName, email, phone, location,
+    });
+    if (profileError) return { error: profileError.message };
 
-  const { data: branch } = await db
-    .from("branches").select("id").eq("code", branchCode).single();
+    const { data: branch } = await db
+      .from("branches").select("id").eq("code", branchCode).single();
 
-  const { error: memberError } = await db.from("members").insert({
-    id: user.id,
-    branch_id: branch?.id ?? undefined,
-    branch_code: branchCode,
-    skills,
-    sector_interests: sectors,
-    job_categories: jobCats,
-  });
-  if (memberError) return { error: memberError.message };
+    const { error: memberError } = await db.from("members").insert({
+      id: user.id,
+      branch_id: branch?.id ?? undefined,
+      branch_code: branchCode,
+      skills,
+      sector_interests: sectors,
+      job_categories: jobCats,
+    });
+    if (memberError) return { error: memberError.message };
 
-  redirect("/member");
+    redirect("/member");
+  } catch (e: unknown) {
+    if (e && typeof e === "object" && "digest" in e) throw e;
+    return { error: "An unexpected error occurred. Please try again." };
+  }
 }
 
 // ── BUSINESS SIGNUP ──────────────────────────────────────────
 export async function businessSignup(formData: FormData) {
-  const supabase = await createClient();
-  const db = createServiceClient();
+  try {
+    const supabase = await createClient();
+    const db = createServiceClient();
 
-  const email       = formData.get("email")        as string;
-  const password    = formData.get("password")     as string;
-  const companyName = formData.get("company_name") as string;
-  const industry    = formData.get("industry")     as string;
-  const description = formData.get("description")  as string;
-  const location    = formData.get("location")     as string;
-  const website     = formData.get("website")      as string;
+    const email       = formData.get("email")        as string;
+    const password    = formData.get("password")     as string;
+    const companyName = formData.get("company_name") as string;
+    const industry    = formData.get("industry")     as string;
+    const description = formData.get("description")  as string;
+    const location    = formData.get("location")     as string;
+    const website     = formData.get("website")      as string;
 
-  const { data: { user }, error: signUpError } = await supabase.auth.signUp({ email, password });
-  if (signUpError || !user) return { error: signUpError?.message ?? "Signup failed" };
+    if (!email || !password || !companyName) {
+      return { error: "Company name, email and password are required." };
+    }
 
-  await db.from("profiles").insert({
-    id: user.id, role: "business" as const, full_name: companyName, email, location,
-  });
+    const { data: { user }, error: signUpError } = await supabase.auth.signUp({ email, password });
+    if (signUpError || !user) return { error: signUpError?.message ?? "Signup failed" };
 
-  const { error } = await db.from("businesses").insert({
-    id: user.id, company_name: companyName, industry, description, website,
-  });
-  if (error) return { error: error.message };
+    const { error: profileError } = await db.from("profiles").insert({
+      id: user.id, role: "business" as const, full_name: companyName, email, location,
+    });
+    if (profileError) return { error: "Profile creation failed: " + profileError.message };
 
-  redirect("/business");
+    const { error: bizError } = await db.from("businesses").insert({
+      id: user.id, company_name: companyName, industry, description, website,
+    });
+    if (bizError) return { error: "Business setup failed: " + bizError.message };
+
+    redirect("/business");
+  } catch (e: unknown) {
+    // Let Next.js redirect errors propagate normally
+    if (e && typeof e === "object" && "digest" in e) throw e;
+    return { error: "An unexpected error occurred. Please try again." };
+  }
 }
 
 // ── MENTOR SIGNUP ────────────────────────────────────────────
 export async function mentorSignup(formData: FormData) {
-  const supabase = await createClient();
-  const db = createServiceClient();
+  try {
+    const supabase = await createClient();
+    const db = createServiceClient();
 
-  const email            = formData.get("email")             as string;
-  const password         = formData.get("password")          as string;
-  const fullName         = formData.get("full_name")         as string;
-  const phone            = formData.get("phone")             as string;
-  const location         = formData.get("location")          as string;
-  const sectorExpertise  = formData.get("sector_expertise")  as string;
-  const yearsExp         = parseInt(formData.get("years_experience") as string) || null;
-  const bio              = formData.get("bio")               as string;
-  const preferredContact = formData.get("preferred_contact") as string;
+    const email            = formData.get("email")             as string;
+    const password         = formData.get("password")          as string;
+    const fullName         = formData.get("full_name")         as string;
+    const phone            = formData.get("phone")             as string;
+    const location         = formData.get("location")          as string;
+    const sectorExpertise  = formData.get("sector_expertise")  as string;
+    const yearsExp         = parseInt(formData.get("years_experience") as string) || null;
+    const bio              = formData.get("bio")               as string;
+    const preferredContact = formData.get("preferred_contact") as string;
 
-  const { data: { user }, error: signUpError } = await supabase.auth.signUp({ email, password });
-  if (signUpError || !user) return { error: signUpError?.message ?? "Signup failed" };
+    if (!email || !password || !fullName) {
+      return { error: "Full name, email and password are required." };
+    }
 
-  await db.from("profiles").insert({
-    id: user.id, role: "mentor" as const, full_name: fullName, email, phone, location,
-  });
+    const { data: { user }, error: signUpError } = await supabase.auth.signUp({ email, password });
+    if (signUpError || !user) return { error: signUpError?.message ?? "Signup failed" };
 
-  const { error } = await db.from("mentors").insert({
-    id: user.id, sector_expertise: sectorExpertise,
-    years_experience: yearsExp, bio, preferred_contact: preferredContact,
-  });
-  if (error) return { error: error.message };
+    const { error: profileError } = await db.from("profiles").insert({
+      id: user.id, role: "mentor" as const, full_name: fullName, email, phone, location,
+    });
+    if (profileError) return { error: "Profile creation failed: " + profileError.message };
 
-  redirect("/mentor");
+    const { error: mentorError } = await db.from("mentors").insert({
+      id: user.id, sector_expertise: sectorExpertise,
+      years_experience: yearsExp, bio, preferred_contact: preferredContact,
+    });
+    if (mentorError) return { error: "Mentor setup failed: " + mentorError.message };
+
+    redirect("/mentor");
+  } catch (e: unknown) {
+    // Let Next.js redirect errors propagate normally
+    if (e && typeof e === "object" && "digest" in e) throw e;
+    return { error: "An unexpected error occurred. Please try again." };
+  }
 }
 
 // ── CHURCH / ADMIN SIGNUP ────────────────────────────────────
