@@ -121,7 +121,7 @@ export function Card({
   return (
     <div
       className={clsx(
-        "border border-[rgba(60,42,20,0.12)] rounded-[4px] bg-warm-white p-6 transition-all duration-200",
+        "border border-[rgba(60,42,20,0.12)] rounded-[4px] bg-warm-white p-4 md:p-6 transition-all duration-200",
         hover && "hover:-translate-y-0.5 hover:shadow-[0_8px_32px_rgba(28,18,8,0.07)]",
         className
       )}
@@ -305,7 +305,7 @@ export function StatCard({
   return (
     <Card className="text-center">
       <div className="text-2xl mb-2">{icon}</div>
-      <div className={clsx("font-serif text-4xl font-light leading-none", colorClass)}>{number}</div>
+      <div className={clsx("font-serif text-[clamp(1.6rem,4vw,2.4rem)] font-light leading-none", colorClass)}>{number}</div>
       <div className="text-[0.72rem] tracking-[0.1em] uppercase text-muted mt-1.5">{label}</div>
     </Card>
   );
@@ -322,12 +322,12 @@ export function PageTitle({
   action?: ReactNode;
 }) {
   return (
-    <div className="flex justify-between items-start mb-8">
+    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 sm:mb-8 gap-3 sm:gap-0">
       <div>
         {label && <SectionLabel>{label}</SectionLabel>}
-        <h1 className="font-serif text-[2.2rem] font-light leading-tight mt-1">{title}</h1>
+        <h1 className="font-serif text-[clamp(1.4rem,4vw,2.2rem)] font-light leading-tight mt-1">{title}</h1>
       </div>
-      {action && <div className="flex gap-2 mt-2">{action}</div>}
+      {action && <div className="flex gap-2 shrink-0">{action}</div>}
     </div>
   );
 }

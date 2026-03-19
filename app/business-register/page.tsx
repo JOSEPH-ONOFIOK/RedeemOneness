@@ -23,7 +23,7 @@ export default function BusinessRegisterPage() {
   }
 
   return (
-    <div className="min-h-screen bg-warm-white flex items-center justify-center px-6 py-24">
+    <div className="min-h-screen bg-warm-white flex items-center justify-center px-6 py-12 md:py-24">
       <div className="w-full max-w-[480px] animate-fade-up">
         <Link href="/" className="block font-serif text-[1.2rem] font-semibold text-deep-brown mb-8 text-center">
           Redeem <em className="text-sky">Oneness</em>

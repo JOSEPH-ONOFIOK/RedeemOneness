@@ -53,7 +53,7 @@ function SignupContent() {
   }
 
   return (
-    <div className="min-h-screen bg-warm-white flex items-center justify-center px-6 py-24">
+    <div className="min-h-screen bg-warm-white flex items-center justify-center px-6 py-12 md:py-24">
       <div className="w-full max-w-[520px] animate-fade-up">
         <div className="text-center mb-10">
           <Link href="/" className="font-serif text-[1.3rem] font-semibold text-deep-brown block mb-4">
