@@ -1,6 +1,6 @@
 "use client";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { ReactNode, useState, useEffect } from "react";
 import clsx from "clsx";
 
@@ -58,8 +58,12 @@ const ROLE_COLORS: Record<Role, string> = {
 
 export default function DashLayout({ role, children }: { role: Role; children: ReactNode }) {
   const pathname = usePathname();
+  const router = useRouter();
   const [open, setOpen] = useState(false);
   const items = NAV[role];
+
+  const homeHref = `/${role}`;
+  const isHome = pathname === homeHref;
 
   // Close drawer on route change
   useEffect(() => { setOpen(false); }, [pathname]);
@@ -153,9 +157,20 @@ export default function DashLayout({ role, children }: { role: Role; children: R
       <main className="flex-1 md:ml-[220px] min-h-screen">
         {/* Mobile top bar */}
         <div className="md:hidden flex items-center justify-between px-4 py-3 bg-deep-brown sticky top-0 z-30 border-b border-white/[0.06]">
-          <Link href="/" className="font-serif text-[1rem] font-semibold text-cream">
-            Redeem <em className="text-gold">Oneness</em>
-          </Link>
+          <div className="flex items-center gap-3">
+            {!isHome && (
+              <button
+                onClick={() => router.back()}
+                className="text-white/60 hover:text-white transition-colors text-[1.1rem] leading-none pr-1"
+                aria-label="Go back"
+              >
+                ←
+              </button>
+            )}
+            <Link href="/" className="font-serif text-[1rem] font-semibold text-cream">
+              Redeem <em className="text-gold">Oneness</em>
+            </Link>
+          </div>
           <button
             onClick={() => setOpen(true)}
             className="flex flex-col gap-[5px] p-1.5"
