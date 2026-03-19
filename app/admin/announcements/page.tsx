@@ -98,7 +98,7 @@ export default function AdminAnnouncementsPage() {
   return (
     <>
       <PageTitle label="Broadcast" title="Send Announcement" />
-      <div className="grid md:grid-cols-[1fr_300px] gap-6 max-w-[900px]">
+      <div className="grid grid-cols-1 md:grid-cols-[1fr_300px] gap-4 md:gap-6 max-w-[900px]">
 
         {/* Post form */}
         <Card>

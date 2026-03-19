@@ -95,14 +95,14 @@ export default function AdminHomePage() {
   return (
     <>
       <PageTitle label="Branch Admin" title={branchName} />
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 md:gap-4 mb-4 md:mb-8">
         <StatCard number={loading ? "…" : totalMembers.toString()}             label="Total Members"   icon="◉" colorClass="text-amber"  />
         <StatCard number={loading ? "…" : recentMembers.length.toString()}     label="New (6 days)"    icon="✦" colorClass="text-forest" />
         <StatCard number={loading ? "…" : skillStats.length.toString()}        label="Skill Areas"     icon="⚡" colorClass="text-sky"    />
         <StatCard number={loading ? "…" : annCount.toString()}                 label="Announcements"   icon="📢" colorClass="text-terra"  />
       </div>
 
-      <div className="grid lg:grid-cols-[1fr_300px] gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-[1fr_300px] gap-4 lg:gap-6">
         <div>
           {/* Skills */}
           <h2 className="font-serif text-[1.3rem] font-semibold mb-4">Skills Distribution</h2>

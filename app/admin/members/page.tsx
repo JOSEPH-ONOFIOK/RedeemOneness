@@ -129,7 +129,7 @@ export default function AdminMembersPage() {
                 <div className="space-y-2">
                   {filtered.map((m, i) => (
                     <Card key={m.id} hover className="py-3 px-5">
-                      <div className="flex justify-between items-center flex-wrap gap-3">
+                      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 sm:gap-3">
                         <div className="flex gap-3 items-center">
                           <Avatar
                             name={m.full_name}

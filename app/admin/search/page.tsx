@@ -50,7 +50,7 @@ export default function AdminSearchPage() {
 
       <Card className="mb-6 max-w-[560px]">
         <form onSubmit={handleSearch}>
-          <div className="flex gap-3 items-end">
+          <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 items-start sm:items-end">
             <div className="flex-1">
               <label className="block text-[0.72rem] tracking-[0.1em] uppercase text-muted mb-1.5">Skill</label>
               <input
@@ -79,7 +79,7 @@ export default function AdminSearchPage() {
       )}
 
       {results.length > 0 && (
-        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 sm:gap-3">
           {results.map((m, i) => (
             <Card key={m.id} hover className="p-4">
               <div className="flex gap-3 mb-3">

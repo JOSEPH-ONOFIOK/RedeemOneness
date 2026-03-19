@@ -114,7 +114,7 @@ export default function BirthdaysPage() {
 
             return (
               <Card key={m.id} className={isToday ? "border border-amber/40 bg-amber/5" : ""}>
-                <div className="flex items-center gap-4">
+                <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4">
                   {/* Day badge */}
                   <div className={`w-14 h-14 rounded-sm flex flex-col items-center justify-center shrink-0 ${isToday ? "bg-amber" : isPast ? "bg-[rgba(60,42,20,0.06)]" : "bg-cream"}`}>
                     <span className={`font-serif text-[1.6rem] font-light leading-none ${isToday ? "text-cream" : "text-deep-brown"}`}>{m.day}</span>

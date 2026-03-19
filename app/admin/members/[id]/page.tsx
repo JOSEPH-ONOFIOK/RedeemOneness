@@ -156,13 +156,13 @@ export default function AdminMemberDetailPage({ params }: { params: { id: string
         ← Back to Members
       </Link>
 
-      <div className="grid md:grid-cols-[1fr_260px] gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-[1fr_260px] gap-4 md:gap-6">
 
         {/* Left column */}
         <div>
 
           {/* Header */}
-          <div className="flex gap-5 items-start mb-8">
+          <div className="flex flex-col sm:flex-row gap-3 sm:gap-5 items-start mb-4 sm:mb-8">
             <Avatar name={member.full_name} size={64} colorClass="bg-amber" />
             <div>
               <SectionLabel>Member Details</SectionLabel>

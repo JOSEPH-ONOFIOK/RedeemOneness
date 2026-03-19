@@ -130,7 +130,7 @@ export default function AdminAdminsPage() {
             <p className="text-muted text-[0.85rem] py-4">No additional admins yet</p>
           ) : (
             admins.map((a, i) => (
-              <div key={a.id} className="flex items-center gap-4 py-4 border-b border-[rgba(60,42,20,0.06)] last:border-0">
+              <div key={a.id} className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4 py-4 border-b border-[rgba(60,42,20,0.06)] last:border-0">
                 <Avatar name={a.full_name} size={44} colorClass={COLORS[i % COLORS.length]} />
                 <div className="flex-1 min-w-0">
                   <p className="font-medium text-[0.88rem] truncate">{a.full_name}</p>
@@ -151,7 +151,7 @@ export default function AdminAdminsPage() {
           {isHead && (
             <div className="pt-5 border-t border-[rgba(60,42,20,0.08)] mt-2">
               <p className="text-[0.68rem] tracking-[0.1em] uppercase text-muted mb-3">Invite New Admin</p>
-              <form onSubmit={handleInvite} className="flex gap-3">
+              <form onSubmit={handleInvite} className="flex flex-col sm:flex-row gap-2 sm:gap-3">
                 <input
                   type="email"
                   value={inviteEmail}

@@ -64,13 +64,13 @@ export default function AdminSettingsPage() {
       {loading ? (
         <div className="text-muted text-[0.85rem]">Loading branch data…</div>
       ) : (
-        <div className="grid md:grid-cols-[1fr_280px] gap-6 max-w-[900px]">
+        <div className="grid grid-cols-1 md:grid-cols-[1fr_280px] gap-4 md:gap-6 max-w-[900px]">
           <Card>
             <form id="settings-form" onSubmit={handleSave}>
               <h3 className="font-serif text-[1.2rem] mb-5">Branch Information</h3>
               <FormInput label="Church Name"   name="church_name"  defaultValue={branch?.church_name} placeholder="Church name" />
               <FormInput label="Branch Name"   name="branch_name"  defaultValue={branch?.branch_name} placeholder="Branch name" />
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <FormInput label="City"  name="city"  defaultValue={branch?.city}  placeholder="City" />
                 <FormInput label="State" name="state" defaultValue={branch?.state} placeholder="State" />
               </div>
