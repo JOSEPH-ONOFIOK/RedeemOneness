@@ -1,53 +1,169 @@
+"use client";
+
+import { useEffect, useState } from "react";
+import { createClient } from "@/lib/supabase/client";
 import { PageTitle, StatCard, Card, Avatar, Btn } from "@/components/ui";
 
+interface Profile {
+  id: string;
+  full_name: string | null;
+  email: string | null;
+}
+
+interface Request {
+  id: string;
+  status: string;
+  message: string | null;
+  created_at: string;
+  member_id: string;
+  member_profile: {
+    full_name: string | null;
+  } | null;
+}
+
+interface Announcement {
+  id: string;
+  title: string;
+  content: string;
+  created_at: string;
+}
+
 export default function MentorHomePage() {
+  const supabase = createClient();
+
+  const [profile, setProfile] = useState<Profile | null>(null);
+  const [pendingCount, setPendingCount] = useState(0);
+  const [activeCount, setActiveCount] = useState(0);
+  const [announcementCount, setAnnouncementCount] = useState(0);
+  const [recentRequests, setRecentRequests] = useState<Request[]>([]);
+  const [recentAnnouncement, setRecentAnnouncement] = useState<Announcement | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function load() {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) { setLoading(false); return; }
+
+      const [
+        { data: profileData },
+        { count: pending },
+        { count: active },
+        { count: announcements },
+        { data: requests },
+        { data: latestAnnouncement },
+      ] = await Promise.all([
+        supabase.from("profiles").select("id, full_name, email").eq("id", user.id).single(),
+        supabase.from("mentorship_requests").select("*", { count: "exact", head: true }).eq("mentor_id", user.id).eq("status", "pending"),
+        supabase.from("mentorship_requests").select("*", { count: "exact", head: true }).eq("mentor_id", user.id).eq("status", "accepted"),
+        supabase.from("announcements").select("*", { count: "exact", head: true }).eq("author_id", user.id),
+        supabase.from("mentorship_requests").select("id, status, message, created_at, member_id").eq("mentor_id", user.id).eq("status", "pending").order("created_at", { ascending: false }).limit(3),
+        supabase.from("announcements").select("id, title, content, created_at").eq("author_id", user.id).order("created_at", { ascending: false }).limit(1).single(),
+      ]);
+
+      setProfile(profileData);
+      setPendingCount(pending ?? 0);
+      setActiveCount(active ?? 0);
+      setAnnouncementCount(announcements ?? 0);
+      setRecentAnnouncement(latestAnnouncement ?? null);
+
+      if (requests && requests.length > 0) {
+        const memberIds = requests.map((r) => r.member_id);
+        const { data: memberProfiles } = await supabase
+          .from("profiles")
+          .select("id, full_name")
+          .in("id", memberIds);
+
+        const profileMap: Record<string, { full_name: string | null }> = {};
+        (memberProfiles ?? []).forEach((p) => { profileMap[p.id] = { full_name: p.full_name }; });
+
+        setRecentRequests(
+          requests.map((r) => ({
+            ...r,
+            member_profile: profileMap[r.member_id] ?? null,
+          }))
+        );
+      }
+
+      setLoading(false);
+    }
+
+    load();
+  }, []);
+
+  const handleAccept = async (requestId: string) => {
+    await supabase.from("mentorship_requests").update({ status: "accepted" }).eq("id", requestId);
+    setRecentRequests((prev) => prev.filter((r) => r.id !== requestId));
+    setPendingCount((c) => Math.max(0, c - 1));
+    setActiveCount((c) => c + 1);
+  };
+
+  const handleDecline = async (requestId: string) => {
+    await supabase.from("mentorship_requests").update({ status: "rejected" }).eq("id", requestId);
+    setRecentRequests((prev) => prev.filter((r) => r.id !== requestId));
+    setPendingCount((c) => Math.max(0, c - 1));
+  };
+
+  const firstName = profile?.full_name?.split(" ")[0] ?? "Mentor";
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center py-20">
+        <p className="text-muted text-[0.9rem]">Loading dashboard…</p>
+      </div>
+    );
+  }
+
   return (
     <>
-      <PageTitle label="Mentor Dashboard" title="Welcome, Adaeze" />
+      <PageTitle label="Mentor Dashboard" title={`Welcome, ${firstName}`} />
       <div className="grid grid-cols-3 gap-4 mb-8">
-        <StatCard number="8" label="Active Mentees"   icon="◈" colorClass="text-amber" />
-        <StatCard number="3" label="Pending Requests" icon="⌛" colorClass="text-terra" />
-        <StatCard number="2" label="Announcements"    icon="📢" colorClass="text-sage"  />
+        <StatCard number={String(activeCount)}      label="Active Mentees"    icon="◈" colorClass="text-amber" />
+        <StatCard number={String(pendingCount)}     label="Pending Requests"  icon="⌛" colorClass="text-terra" />
+        <StatCard number={String(announcementCount)} label="Announcements"   icon="📢" colorClass="text-sage"  />
       </div>
+
       <div className="grid lg:grid-cols-[1fr_300px] gap-6">
         <div>
           <h2 className="font-serif text-[1.3rem] font-semibold mb-4">Recent Requests</h2>
-          {[{n:"Chidera O.",msg:"Hi Adaeze! I'd love guidance on breaking into product design from frontend development.",c:"bg-amber"},{n:"Emeka T.",msg:"I'm preparing for a UX interview and could use your advice on portfolio presentation.",c:"bg-sage"}].map(r=>(
-            <Card key={r.n} hover className="mb-3">
-              <div className="flex gap-4 items-start mb-4">
-                <Avatar name={r.n} size={42} colorClass={r.c} />
-                <div>
-                  <p className="font-medium mb-1">{r.n}</p>
-                  <p className="text-[0.82rem] text-muted leading-[1.6]">{r.msg}</p>
-                </div>
-              </div>
-              <div className="flex gap-2">
-                <Btn small variant="sage">Accept</Btn>
-                <Btn small variant="ghost" href="/mentor/messages">Message</Btn>
-                <Btn small variant="danger">Decline</Btn>
-              </div>
+          {recentRequests.length === 0 ? (
+            <Card>
+              <p className="text-muted text-[0.85rem] text-center py-6">No pending mentorship requests.</p>
             </Card>
-          ))}
+          ) : (
+            recentRequests.map((r) => {
+              const name = r.member_profile?.full_name ?? "Unknown Member";
+              return (
+                <Card key={r.id} hover className="mb-3">
+                  <div className="flex gap-4 items-start mb-4">
+                    <Avatar name={name} size={42} colorClass="bg-amber" />
+                    <div>
+                      <p className="font-medium mb-1">{name}</p>
+                      <p className="text-[0.82rem] text-muted leading-[1.6]">
+                        {r.message ?? "No message provided."}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex gap-2">
+                    <Btn small variant="sage" onClick={() => handleAccept(r.id)}>Accept</Btn>
+                    <Btn small variant="danger" onClick={() => handleDecline(r.id)}>Decline</Btn>
+                  </div>
+                </Card>
+              );
+            })
+          )}
         </div>
+
         <div className="space-y-4">
           <Card>
-            <p className="text-[0.68rem] tracking-[0.1em] uppercase text-muted mb-3">Recent Conversations</p>
-            {[{n:"Chidera O.",l:"Thanks for the feedback!",c:"bg-amber"},{n:"Blessing A.",l:"I updated my portfolio.",c:"bg-terra"}].map(c=>(
-              <div key={c.n} className="flex gap-3 items-center mb-3 cursor-pointer hover:opacity-80">
-                <Avatar name={c.n} size={34} colorClass={c.c} />
-                <div className="flex-1 min-w-0">
-                  <p className="text-[0.83rem] font-medium">{c.n}</p>
-                  <p className="text-[0.72rem] text-muted truncate">{c.l}</p>
-                </div>
-              </div>
-            ))}
-            <Btn small variant="ghost" href="/mentor/messages" className="mt-1">View all messages</Btn>
-          </Card>
-          <Card>
             <p className="text-[0.68rem] tracking-[0.1em] uppercase text-muted mb-3">Your Announcements</p>
-            <div className="bg-cream rounded-sm p-3 text-[0.82rem] leading-[1.6] text-rich-brown mb-3">
-              Looking for 3 students interested in UI design mentorship...
-            </div>
+            {recentAnnouncement ? (
+              <div className="bg-cream rounded-sm p-3 text-[0.82rem] leading-[1.6] text-rich-brown mb-3">
+                <p className="font-medium mb-1">{recentAnnouncement.title}</p>
+                <p className="text-muted line-clamp-3">{recentAnnouncement.content}</p>
+              </div>
+            ) : (
+              <p className="text-muted text-[0.82rem] mb-3">No announcements yet.</p>
+            )}
             <Btn small variant="ghost" href="/mentor/announcements">Post New Announcement</Btn>
           </Card>
         </div>

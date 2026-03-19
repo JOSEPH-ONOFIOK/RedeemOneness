@@ -1,45 +1,167 @@
-import { PageTitle, Card, Avatar, Btn, FormSelect } from "@/components/ui";
+"use client";
 
-const MENTORS = [
-  { name:"Adaeze Obi",    sector:"UX / Product Design",  years:8,  bio:"Principal designer at a top fintech. Passionate about growing the next generation of African designers.", colorClass:"bg-terra",       available:true  },
-  { name:"Kemi Adeyemi",  sector:"Finance & Investment",  years:12, bio:"CFO with deep experience in corporate finance, fundraising, and financial strategy.",                    colorClass:"bg-amber",       available:true  },
-  { name:"Tunde Bakare",  sector:"Software Engineering",  years:10, bio:"Senior engineer at a global tech company. Specialises in backend systems and cloud architecture.",         colorClass:"bg-sage",        available:false },
-  { name:"Dr. Ngozi Eze", sector:"Public Health",         years:15, bio:"Health consultant with a focus on community health systems in Sub-Saharan Africa.",                       colorClass:"bg-rich-brown",  available:true  },
-];
+import { useEffect, useState } from "react";
+import { createClient } from "@/lib/supabase/client";
+import { PageTitle, Card, Avatar, Btn } from "@/components/ui";
+
+interface MentorCard {
+  id: string;
+  full_name: string | null;
+  location: string | null;
+  sector_expertise: string | null;
+  years_experience: number | null;
+  bio: string | null;
+  requestStatus: "none" | "pending" | "accepted" | "rejected";
+}
+
+const AVATAR_COLORS = ["bg-terra", "bg-amber", "bg-sage", "bg-rich-brown"];
 
 export default function MentorshipPage() {
+  const supabase = createClient();
+  const [mentors, setMentors] = useState<MentorCard[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [requesting, setRequesting] = useState<string | null>(null);
+  const [userId, setUserId] = useState<string | null>(null);
+
+  useEffect(() => {
+    async function load() {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) { setLoading(false); return; }
+      setUserId(user.id);
+
+      const [{ data: mentorRows }, { data: myRequests }] = await Promise.all([
+        supabase.from("mentors").select("id, sector_expertise, years_experience, bio"),
+        supabase
+          .from("mentorship_requests")
+          .select("mentor_id, status")
+          .eq("member_id", user.id),
+      ]);
+
+      if (!mentorRows || mentorRows.length === 0) {
+        setLoading(false);
+        return;
+      }
+
+      const mentorIds = mentorRows.map((m) => m.id);
+      const { data: profileRows } = await supabase
+        .from("profiles")
+        .select("id, full_name, location")
+        .in("id", mentorIds);
+
+      const profileMap: Record<string, { full_name: string | null; location: string | null }> = {};
+      (profileRows ?? []).forEach((p) => {
+        profileMap[p.id] = { full_name: p.full_name, location: p.location };
+      });
+
+      const requestMap: Record<string, string> = {};
+      (myRequests ?? []).forEach((r) => {
+        requestMap[r.mentor_id] = r.status;
+      });
+
+      setMentors(
+        mentorRows.map((m) => ({
+          id: m.id,
+          full_name: profileMap[m.id]?.full_name ?? null,
+          location: profileMap[m.id]?.location ?? null,
+          sector_expertise: m.sector_expertise,
+          years_experience: m.years_experience,
+          bio: m.bio,
+          requestStatus: (requestMap[m.id] as MentorCard["requestStatus"]) ?? "none",
+        }))
+      );
+
+      setLoading(false);
+    }
+
+    load();
+  }, []);
+
+  const handleRequest = async (mentorId: string) => {
+    if (!userId) return;
+    setRequesting(mentorId);
+
+    const { error } = await supabase.from("mentorship_requests").insert({
+      mentor_id: mentorId,
+      member_id: userId,
+      status: "pending",
+      message: null,
+    });
+
+    if (!error) {
+      setMentors((prev) =>
+        prev.map((m) => (m.id === mentorId ? { ...m, requestStatus: "pending" } : m))
+      );
+    }
+
+    setRequesting(null);
+  };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center py-20">
+        <p className="text-muted text-[0.9rem]">Loading mentors…</p>
+      </div>
+    );
+  }
+
   return (
     <>
       <PageTitle label="Growth" title="Find a Mentor" />
-      <div className="grid md:grid-cols-[200px_1fr] gap-8">
-        <div>
-          <div className="border border-[rgba(60,42,20,0.12)] rounded-[4px] bg-warm-white p-5">
-            <p className="text-[0.68rem] tracking-[0.1em] uppercase text-muted mb-4">Filter Mentors</p>
-            <FormSelect label="Sector"     options={["All Sectors","Technology","Finance","Law","Medicine"]} />
-            <FormSelect label="Location"   options={["Any Location","Lagos","Abuja","Port Harcourt"]} />
-            <FormSelect label="Experience" options={["Any Level","5-10 years","10-15 years","15+ years"]} />
-          </div>
-        </div>
-        <div className="grid sm:grid-cols-2 gap-4">
-          {MENTORS.map((m)=>(
-            <Card key={m.name} hover>
-              <div className="flex gap-3 mb-3">
-                <Avatar name={m.name} size={48} colorClass={m.colorClass} />
-                <div>
-                  <p className="font-serif text-[1.05rem] font-semibold">{m.name}</p>
-                  <p className="text-[0.73rem] text-muted">{m.sector}</p>
-                  <p className={`text-[0.68rem] mt-0.5 ${m.available?"text-sage":"text-muted"}`}>
-                    {m.available ? "● Available" : "○ Busy"}
-                  </p>
+      {mentors.length === 0 ? (
+        <Card className="max-w-[480px]">
+          <p className="text-muted text-[0.85rem] text-center py-10">
+            No mentors are available at the moment.
+          </p>
+        </Card>
+      ) : (
+        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          {mentors.map((m, i) => {
+            const name = m.full_name ?? "Unknown Mentor";
+            const colorClass = AVATAR_COLORS[i % AVATAR_COLORS.length];
+
+            return (
+              <Card key={m.id} hover>
+                <div className="flex gap-3 mb-3">
+                  <Avatar name={name} size={48} colorClass={colorClass} />
+                  <div>
+                    <p className="font-serif text-[1.05rem] font-semibold">{name}</p>
+                    <p className="text-[0.73rem] text-muted">{m.sector_expertise ?? "—"}</p>
+                    {m.location && (
+                      <p className="text-[0.68rem] text-muted mt-0.5">{m.location}</p>
+                    )}
+                  </div>
                 </div>
-              </div>
-              <p className="text-[0.78rem] text-muted mb-1">{m.years} years experience</p>
-              <p className="text-[0.8rem] leading-[1.6] text-rich-brown mb-4">{m.bio}</p>
-              <Btn small href="/member/mentorship/1">Request Mentorship</Btn>
-            </Card>
-          ))}
+                {m.years_experience != null && (
+                  <p className="text-[0.78rem] text-muted mb-1">{m.years_experience} years experience</p>
+                )}
+                {m.bio && (
+                  <p className="text-[0.8rem] leading-[1.6] text-rich-brown mb-4 line-clamp-3">{m.bio}</p>
+                )}
+                <div className="flex gap-2">
+                  <Btn small href={`/member/mentorship/${m.id}`} variant="ghost">
+                    View Profile
+                  </Btn>
+                  {m.requestStatus === "pending" && (
+                    <span className="text-[0.75rem] text-muted self-center px-2">Request Sent</span>
+                  )}
+                  {m.requestStatus === "accepted" && (
+                    <span className="text-[0.75rem] text-sage self-center px-2">● Connected</span>
+                  )}
+                  {m.requestStatus === "none" && (
+                    <Btn
+                      small
+                      onClick={() => handleRequest(m.id)}
+                      disabled={requesting === m.id}
+                    >
+                      {requesting === m.id ? "Sending…" : "Request Mentorship"}
+                    </Btn>
+                  )}
+                </div>
+              </Card>
+            );
+          })}
         </div>
-      </div>
+      )}
     </>
   );
 }
