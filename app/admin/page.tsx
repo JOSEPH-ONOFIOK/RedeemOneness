@@ -51,11 +51,12 @@ export default function AdminHomePage() {
       ] = await Promise.all([
         supabase.from("members").select("id", { count: "exact", head: true }).eq("branch_id", branch.id),
         supabase.from("members")
-          .select("id, skills, employment_status, profiles(full_name, phone, created_at)")
+          .select("id, skills, employment_status, created_at, profiles(full_name, phone)")
           .eq("branch_id", branch.id)
-          .gte("profiles.created_at", sixDaysAgo.toISOString())
+          .gte("created_at", sixDaysAgo.toISOString())
+          .order("created_at", { ascending: false })
           .limit(10),
-        supabase.from("members").select("skills, profiles(created_at)").eq("branch_id", branch.id),
+        supabase.from("members").select("skills, created_at").eq("branch_id", branch.id),
         supabase.from("announcements").select("id", { count: "exact", head: true }).eq("branch_id", branch.id),
       ]);
 
@@ -65,25 +66,25 @@ export default function AdminHomePage() {
       if (recent) {
         setRecentMembers(recent.map((m: any) => ({
           id:                m.id,
-          full_name:         m.profiles?.full_name  ?? "—",
-          phone:             m.profiles?.phone       ?? null,
-          created_at:        m.profiles?.created_at ?? "",
-          skills:            m.skills ?? [],
+          full_name:         m.profiles?.full_name ?? "—",
+          phone:             m.profiles?.phone     ?? null,
+          created_at:        m.created_at          ?? "",
+          skills:            m.skills              ?? [],
           employment_status: m.employment_status,
         })));
       }
 
       if (allM) {
         const now = Date.now();
-        const weekMs  = 7  * 86400000;
-        const monthMs = 30 * 86400000;
+        const weekMs  = 7   * 86400000;
+        const monthMs = 30  * 86400000;
         const yearMs  = 365 * 86400000;
 
         let wk = 0, mo = 0, yr = 0;
         const counts: Record<string, number> = {};
         allM.forEach((m: any) => {
           (m.skills ?? []).forEach((s: string) => { counts[s] = (counts[s] ?? 0) + 1; });
-          const createdAt = m.profiles?.created_at;
+          const createdAt = m.created_at;
           if (createdAt) {
             const diff = now - new Date(createdAt).getTime();
             if (diff <= weekMs)  wk++;

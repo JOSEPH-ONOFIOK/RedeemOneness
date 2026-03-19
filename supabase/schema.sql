@@ -45,7 +45,8 @@ create table public.members (
   job_categories    text[] default '{}',
   bio               text,
   employment_status boolean,           -- true = employed, false = unemployed, null = not specified
-  date_of_birth     date               -- for birthday notifications
+  date_of_birth     date,              -- for birthday notifications
+  created_at        timestamptz default now()  -- when the member joined this branch
 );
 
 -- ── BUSINESSES ──────────────────────────────────────────────
@@ -243,6 +244,7 @@ create policy "admin_invites_update" on public.admin_invites for update using (
 -- MIGRATION: Run these if schema already applied
 -- ALTER TABLE public.members ADD COLUMN IF NOT EXISTS employment_status boolean;
 -- ALTER TABLE public.members ADD COLUMN IF NOT EXISTS date_of_birth date;
+-- ALTER TABLE public.members ADD COLUMN IF NOT EXISTS created_at timestamptz default now();
 -- ============================================================
 
 -- ============================================================
