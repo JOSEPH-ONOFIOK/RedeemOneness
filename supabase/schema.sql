@@ -43,7 +43,9 @@ create table public.members (
   skills            text[] default '{}',
   sector_interests  text[] default '{}',
   job_categories    text[] default '{}',
-  bio               text
+  bio               text,
+  employment_status boolean,           -- true = employed, false = unemployed, null = not specified
+  date_of_birth     date               -- for birthday notifications
 );
 
 -- ── BUSINESSES ──────────────────────────────────────────────
@@ -195,6 +197,53 @@ create policy "ann_read"            on public.announcements for select using (tr
 create policy "ann_insert"          on public.announcements for insert with check (
   exists (select 1 from public.profiles where id = auth.uid() and role in ('admin','mentor'))
 );
+
+-- ── BRANCH ADMINS (multiple admins per branch) ──────────────
+create table public.branch_admins (
+  id          uuid primary key default gen_random_uuid(),
+  branch_id   uuid not null references public.branches(id) on delete cascade,
+  profile_id  uuid not null references public.profiles(id) on delete cascade,
+  invited_by  uuid references public.profiles(id),
+  is_head     boolean default false,
+  created_at  timestamptz default now(),
+  unique(branch_id, profile_id)
+);
+
+-- ── ADMIN INVITES ────────────────────────────────────────────
+create table public.admin_invites (
+  id          uuid primary key default gen_random_uuid(),
+  branch_id   uuid not null references public.branches(id) on delete cascade,
+  email       text not null,
+  invited_by  uuid references public.profiles(id),
+  status      text default 'pending' check (status in ('pending','accepted','revoked')),
+  created_at  timestamptz default now(),
+  unique(branch_id, email)
+);
+
+alter table public.branch_admins enable row level security;
+alter table public.admin_invites  enable row level security;
+
+create policy "branch_admins_read"   on public.branch_admins for select using (true);
+create policy "branch_admins_insert" on public.branch_admins for insert with check (
+  exists (select 1 from public.branches where id = branch_id and admin_id = auth.uid())
+);
+create policy "branch_admins_delete" on public.branch_admins for delete using (
+  exists (select 1 from public.branches where id = branch_id and admin_id = auth.uid())
+);
+
+create policy "admin_invites_read"   on public.admin_invites for select using (true);
+create policy "admin_invites_insert" on public.admin_invites for insert with check (
+  exists (select 1 from public.branches where id = branch_id and admin_id = auth.uid())
+);
+create policy "admin_invites_update" on public.admin_invites for update using (
+  exists (select 1 from public.branches where id = branch_id and admin_id = auth.uid())
+);
+
+-- ============================================================
+-- MIGRATION: Run these if schema already applied
+-- ALTER TABLE public.members ADD COLUMN IF NOT EXISTS employment_status boolean;
+-- ALTER TABLE public.members ADD COLUMN IF NOT EXISTS date_of_birth date;
+-- ============================================================
 
 -- ============================================================
 -- HELPER FUNCTION: auto-create profile after signup

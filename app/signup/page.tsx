@@ -77,6 +77,20 @@ function SignupContent() {
             <PasswordInput label="Password"         name="password"         placeholder="Create a strong password" required onChange={(e) => setPassword(e.target.value)} />
             <PasswordInput label="Confirm Password" name="confirm_password" placeholder="Repeat your password"     required confirmOf={password} />
             <FormInput label="Location"  name="location"   placeholder="Lagos, Nigeria" />
+            <FormInput label="Date of Birth" name="date_of_birth" type="date" />
+            <div className="mb-5">
+              <label className="block text-[0.72rem] tracking-[0.1em] uppercase text-muted mb-2">
+                Currently Employed? <span className="text-muted/50">(optional)</span>
+              </label>
+              <div className="flex gap-3">
+                {[["yes","Yes — Employed"],["no","No — Unemployed"]].map(([v,l]) => (
+                  <label key={v} className="flex items-center gap-2 cursor-pointer flex-1 border border-[rgba(60,42,20,0.12)] rounded-sm px-4 py-2.5 has-[:checked]:border-amber has-[:checked]:bg-amber/5 transition-colors">
+                    <input type="radio" name="employment_status" value={v} className="accent-amber" />
+                    <span className="text-[0.82rem]">{l}</span>
+                  </label>
+                ))}
+              </div>
+            </div>
             <FormSelect label="Sector Interests" name="sector_interests"
               options={["Select sectors…","Technology","Finance","Healthcare","Education","Creative Arts","Engineering","Law","Business"]} />
             <FormSelect label="Job Categories" name="job_categories"

@@ -36,6 +36,7 @@ const NAV: Record<Role, { icon: string; label: string; href: string }[]> = {
     { icon: "◉",  label: "Members",      href: "/admin/members" },
     { icon: "📢", label: "Announcements",href: "/admin/announcements" },
     { icon: "⚡",  label: "Search",       href: "/admin/search" },
+    { icon: "🎂", label: "Birthdays",    href: "/admin/birthdays" },
     { icon: "👥", label: "Admins",       href: "/admin/admins" },
     { icon: "⚙",  label: "Settings",     href: "/admin/settings" },
   ],
