@@ -20,6 +20,9 @@ export default function AdminHomePage() {
   const [recentMembers, setRecentMembers] = useState<RecentMember[]>([]);
   const [skillStats,    setSkillStats]    = useState<{ label: string; count: number }[]>([]);
   const [annCount,      setAnnCount]      = useState(0);
+  const [weekCount,     setWeekCount]     = useState(0);
+  const [monthCount,    setMonthCount]    = useState(0);
+  const [yearCount,     setYearCount]     = useState(0);
   const [loading,       setLoading]       = useState(true);
 
   useEffect(() => {
@@ -52,7 +55,7 @@ export default function AdminHomePage() {
           .eq("branch_id", branch.id)
           .gte("profiles.created_at", sixDaysAgo.toISOString())
           .limit(10),
-        supabase.from("members").select("skills").eq("branch_id", branch.id),
+        supabase.from("members").select("skills, profiles(created_at)").eq("branch_id", branch.id),
         supabase.from("announcements").select("id", { count: "exact", head: true }).eq("branch_id", branch.id),
       ]);
 
@@ -71,8 +74,26 @@ export default function AdminHomePage() {
       }
 
       if (allM) {
+        const now = Date.now();
+        const weekMs  = 7  * 86400000;
+        const monthMs = 30 * 86400000;
+        const yearMs  = 365 * 86400000;
+
+        let wk = 0, mo = 0, yr = 0;
         const counts: Record<string, number> = {};
-        allM.forEach((m: any) => (m.skills ?? []).forEach((s: string) => { counts[s] = (counts[s] ?? 0) + 1; }));
+        allM.forEach((m: any) => {
+          (m.skills ?? []).forEach((s: string) => { counts[s] = (counts[s] ?? 0) + 1; });
+          const createdAt = m.profiles?.created_at;
+          if (createdAt) {
+            const diff = now - new Date(createdAt).getTime();
+            if (diff <= weekMs)  wk++;
+            if (diff <= monthMs) mo++;
+            if (diff <= yearMs)  yr++;
+          }
+        });
+        setWeekCount(wk);
+        setMonthCount(mo);
+        setYearCount(yr);
         setSkillStats(Object.entries(counts).sort((a,b)=>b[1]-a[1]).slice(0,5).map(([label,count])=>({label,count})));
       }
 
@@ -163,6 +184,24 @@ export default function AdminHomePage() {
 
         <div className="space-y-4">
           <BranchQRCard />
+
+          <Card>
+            <p className="text-[0.68rem] tracking-[0.1em] uppercase text-muted mb-3">Member Growth</p>
+            {[
+              { label: "This Week",  value: weekCount,  color: "text-sky"    },
+              { label: "This Month", value: monthCount, color: "text-forest" },
+              { label: "This Year",  value: yearCount,  color: "text-amber"  },
+              { label: "All Time",   value: totalMembers, color: "text-terra" },
+            ].map(({ label, value, color }) => (
+              <div key={label} className="flex justify-between items-center py-2 border-b border-[rgba(60,42,20,0.06)] last:border-0">
+                <span className="text-[0.82rem] text-muted">{label}</span>
+                <span className={`font-serif text-[1.1rem] font-semibold ${color}`}>
+                  {loading ? "…" : value}
+                </span>
+              </div>
+            ))}
+          </Card>
+
           <Card>
             <p className="text-[0.68rem] tracking-[0.1em] uppercase text-muted mb-3">Quick Actions</p>
             {[
