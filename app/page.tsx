@@ -229,12 +229,40 @@ export default function HomePage() {
             <div className="font-serif text-[1.3rem] font-semibold text-cream mb-3">Redeem <em className="text-gold">Oneness</em></div>
             <p className="text-[0.82rem] leading-[1.7] text-white/40 max-w-[260px]">Connecting faith communities with economic opportunity — one branch at a time.</p>
           </div>
-          {[["Platform",["Member Sign Up","Business Registration","Church Branch","Mentor Portal","Login"]],["Company",["About Us","Our Mission","Blog","Careers","Contact"]],["Legal",["Privacy Policy","Terms of Service","Cookie Policy"]]].map(([h,ls])=>(
-            <div key={h as string}>
-              <div className="text-[0.68rem] tracking-[0.14em] uppercase text-gold mb-4 font-medium">{h}</div>
-              {(ls as string[]).map(l=><div key={l} className="text-[0.8rem] text-white/40 mb-2 cursor-pointer hover:text-cream/70 transition-colors">{l}</div>)}
-            </div>
-          ))}
+          <div>
+            <div className="text-[0.68rem] tracking-[0.14em] uppercase text-gold mb-4 font-medium">Platform</div>
+            {([
+              ["Member Sign Up",       "/signup"],
+              ["Business Registration","/business-register"],
+              ["Church Branch",        "/church-register"],
+              ["Mentor Portal",        "/mentor-register"],
+              ["Login",                "/login"],
+            ] as [string,string][]).map(([l,h])=>(
+              <Link key={l} href={h} className="block text-[0.8rem] text-white/40 mb-2 hover:text-cream/70 transition-colors">{l}</Link>
+            ))}
+          </div>
+          <div>
+            <div className="text-[0.68rem] tracking-[0.14em] uppercase text-gold mb-4 font-medium">Company</div>
+            {([
+              ["About Us",    "/about"],
+              ["Our Mission", "/#how"],
+              ["Blog",        "#"],
+              ["Careers",     "#"],
+              ["Contact",     "mailto:hello@redeemoneness.com"],
+            ] as [string,string][]).map(([l,h])=>(
+              <a key={l} href={h} className="block text-[0.8rem] text-white/40 mb-2 hover:text-cream/70 transition-colors">{l}</a>
+            ))}
+          </div>
+          <div>
+            <div className="text-[0.68rem] tracking-[0.14em] uppercase text-gold mb-4 font-medium">Legal</div>
+            {([
+              ["Privacy Policy",   "/privacy"],
+              ["Terms of Service", "/terms"],
+              ["Cookie Policy",    "/privacy#cookies"],
+            ] as [string,string][]).map(([l,h])=>(
+              <Link key={l} href={h} className="block text-[0.8rem] text-white/40 mb-2 hover:text-cream/70 transition-colors">{l}</Link>
+            ))}
+          </div>
         </div>
         <div className="flex flex-col sm:flex-row justify-between gap-1 text-[0.72rem] text-white/25">
           <span>© 2025 Redeem Oneness. All rights reserved.</span>

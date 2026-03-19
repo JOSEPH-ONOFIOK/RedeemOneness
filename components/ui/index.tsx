@@ -2,8 +2,6 @@
 import { ReactNode, useState, useEffect, InputHTMLAttributes, TextareaHTMLAttributes } from "react";
 import Link from "next/link";
 import clsx from "clsx";
-import QRCodeLib from "qrcode";
-
 // ── Avatar ────────────────────────────────────────────────────────
 export function Avatar({
   name,
@@ -371,74 +369,4 @@ export function SkillTagsInput({ label, initial, onChange }: { label: string; in
   );
 }
 
-// ── QRScanner ─────────────────────────────────────────────────────
-export function QRScanner({
-  onScan,
-  onError,
-}: {
-  onScan: (value: string) => void;
-  onError?: (err: string) => void;
-}) {
-  const [active, setActive] = useState(false);
-
-  useEffect(() => {
-    let scanner: { stop: () => Promise<void> } | null = null;
-    let cancelled = false;
-    const id = "qr-reader-container";
-
-    import("html5-qrcode").then(({ Html5Qrcode }) => {
-      if (cancelled) return;
-      const s = new Html5Qrcode(id);
-      scanner = s;
-      s.start(
-        { facingMode: "environment" },
-        { fps: 10, qrbox: { width: 240, height: 240 } },
-        (text: string) => { s.stop().catch(() => {}); onScan(text); },
-        undefined
-      )
-        .then(() => setActive(true))
-        .catch((err: unknown) =>
-          onError?.(err instanceof Error ? err.message : "Camera access denied")
-        );
-    });
-
-    return () => {
-      cancelled = true;
-      scanner?.stop().catch(() => {});
-    };
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
-
-  return (
-    <div className="relative">
-      <div id="qr-reader-container" className="rounded-sm overflow-hidden" />
-      {!active && (
-        <div className="flex flex-col items-center justify-center h-48 gap-2 text-[0.82rem] text-muted">
-          <span className="text-2xl">⊙</span>
-          Starting camera…
-        </div>
-      )}
-    </div>
-  );
-}
-
-// ── QRCodeImage ───────────────────────────────────────────────────
-export function QRCodeImage({
-  value,
-  size = 144,
-}: {
-  value: string;
-  size?: number;
-}) {
-  const [dataUrl, setDataUrl] = useState<string>("");
-
-  useEffect(() => {
-    QRCodeLib.toDataURL(value, {
-      width: size,
-      margin: 1,
-      color: { dark: "#1C1208", light: "#F7F2EA" },
-    }).then(setDataUrl);
-  }, [value, size]);
-
-  if (!dataUrl) return <div style={{ width: size, height: size }} className="bg-cream rounded-[4px] mx-auto" />;
-  return <img src={dataUrl} alt="QR Code" width={size} height={size} className="rounded-[4px] mx-auto" />;
-}
+export { QRCodeImage } from "./QRCodeImage";
