@@ -40,7 +40,7 @@ export async function middleware(request: NextRequest) {
 
   // Check protected route access
   for (const [prefix, roles] of Object.entries(PROTECTED)) {
-    if (path.startsWith(prefix)) {
+    if (path === prefix || path.startsWith(prefix + "/")) {
       if (!user) {
         return NextResponse.redirect(new URL("/login", request.url));
       }

@@ -78,7 +78,7 @@ export default function MemberHomePage() {
 
       setProfile(profileData);
       setMember(memberData as MemberProfile | null);
-      setJobs((jobsRes.data ?? []) as Job[]);
+      setJobs((jobsRes.data ?? []) as unknown as Job[]);
       setMentorCount(mentorsRes.count ?? 0);
 
       // Fetch announcements for the member's branch

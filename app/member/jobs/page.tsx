@@ -42,7 +42,7 @@ export default function JobsPage() {
           : Promise.resolve({ data: [] }),
       ]);
 
-      const fetchedJobs = (jobsRes.data ?? []) as Job[];
+      const fetchedJobs = (jobsRes.data ?? []) as unknown as Job[];
       setJobs(fetchedJobs);
 
       // Derive unique sectors
