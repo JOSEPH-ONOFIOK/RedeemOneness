@@ -10,7 +10,7 @@ export default function HomePage() {
           Redeem <em className="text-amber">Oneness</em>
         </Link>
         <div className="hidden md:flex items-center gap-10">
-          {[["How It Works","/how-it-works"],["Members","/members"],["Businesses","/businesses"],["Churches","/churches"]].map(([l,h]) => (
+          {[["How It Works","/how-it-works"],["Members","/members"],["Mentors","/mentors"],["Businesses","/businesses"],["Churches","/churches"]].map(([l,h]) => (
             <Link key={l} href={h} className="text-[0.78rem] tracking-[0.08em] uppercase text-muted hover:text-deep-brown transition-colors">
               {l}
             </Link>

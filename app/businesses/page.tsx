@@ -21,12 +21,12 @@ export default function BusinessesPage() {
   return (
     <div className="bg-warm-white min-h-screen">
       {/* Nav */}
-      <nav className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-12 py-5 bg-warm-white/95 backdrop-blur-md border-b border-[rgba(60,42,20,0.1)]">
+      <nav className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-4 md:px-12 py-5 bg-warm-white/95 backdrop-blur-md border-b border-[rgba(60,42,20,0.1)]">
         <Link href="/" className="font-serif text-[1.4rem] font-semibold text-deep-brown">
           Redeem <em className="text-amber">Oneness</em>
         </Link>
         <div className="hidden md:flex items-center gap-10">
-          {[["How It Works","/how-it-works"],["Members","/members"],["Businesses","/businesses"],["Churches","/churches"]].map(([l,h])=>(
+          {[["How It Works","/how-it-works"],["Members","/members"],["Mentors","/mentors"],["Businesses","/businesses"],["Churches","/churches"]].map(([l,h])=>(
             <Link key={l} href={h} className="text-[0.78rem] tracking-[0.08em] uppercase text-muted hover:text-deep-brown transition-colors">{l}</Link>
           ))}
           <Btn href="/login" small>Login</Btn>
